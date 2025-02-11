@@ -1,9 +1,14 @@
+"""
+Last Edited on Tue Feb 11 05:06 PM 2025
+@author: Jacob Gagnon
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 from mpl_toolkits.mplot3d import Axes3D
 
 def complex_function(z):
-    #return np.sin(z)  # Example function, modify as needed
+    #return np.sin(z)
 
     #return z**3 - 1
 
@@ -23,19 +28,21 @@ def plot_complex_function(real_range=(-2, 2), imag_range=(-2, 2), resolution=100
     
     # Plot magnitude
     ax1 = fig.add_subplot(121, projection='3d')
-    ax1.plot_surface(X, Y, np.abs(W), cmap='viridis')
+    surf1 = ax1.plot_surface(X, Y, np.abs(W), cmap='viridis')
     ax1.set_title("Magnitude")
     ax1.set_xlabel("Re(z)")
     ax1.set_ylabel("Im(z)")
     ax1.set_zlabel("|f(z)|")
+    fig.colorbar(surf1, ax=ax1, shrink=0.5, aspect=10)  # Add color bar
     
     # Plot phase
     ax2 = fig.add_subplot(122, projection='3d')
-    ax2.plot_surface(X, Y, np.angle(W), cmap='twilight')
+    surf2 = ax2.plot_surface(X, Y, np.angle(W), cmap='twilight')
     ax2.set_title("Phase")
     ax2.set_xlabel("Re(z)")
     ax2.set_ylabel("Im(z)")
     ax2.set_zlabel("Arg(f(z))")
+    fig.colorbar(surf2, ax=ax2, shrink=0.5, aspect=10)  # Add color bar
     
     plt.show()
 
