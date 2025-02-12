@@ -1,3 +1,11 @@
+"""
+Last Edited on Wed Feb 12 12:26 PM 2025
+@author: Jacob Gagnon
+"""
+
+# inspired and verified by Dan Durkin's Desmos 3D Grapher 
+# https://www.desmos.com/calculator/48fzxfwiiv
+
 import sys
 import numpy as np
 import matplotlib.pyplot as plt
