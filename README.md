@@ -15,5 +15,6 @@ The code is able to take in a custom complex function and plot the magnitude and
 where j here is the same as i in mathematics (sqrt(-1)).  The graphs are interactive, and can be spun 360 degrees in all directions.  Below is the Desmos version for comparison, with slightly different parameters:
 
 <img width="835" alt="Screenshot 2025-02-12 at 1 37 04 PM" src="https://github.com/user-attachments/assets/97364bd1-5af8-46d3-8e02-0e32bf4a4c38" />
+Link to Dan Durkin's 3D Grapher - Complex Function in Desmos: https://www.desmos.com/calculator/48fzxfwiiv
 
 Enjoy!
