@@ -11,4 +11,7 @@ The code is able to take in a custom complex function and plot the magnitude and
 
 <img width="972" alt="Screenshot 2025-02-12 at 1 11 32 PM" src="https://github.com/user-attachments/assets/3d666837-1d13-42c2-8154-71d4398ca077" />
 
-where j here is the same as i in mathematics (sqrt(-1)).
+where j here is the same as i in mathematics (sqrt(-1)).  The graphs are interactive, and can be spun 360 degrees in all directions.  Below is the Desmos version for comparison, with slightly different parameters:
+<img width="835" alt="Screenshot 2025-02-12 at 1 37 04 PM" src="https://github.com/user-attachments/assets/97364bd1-5af8-46d3-8e02-0e32bf4a4c38" />
+
+Enjoy!
