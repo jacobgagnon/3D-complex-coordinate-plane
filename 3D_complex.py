@@ -56,7 +56,7 @@ def plot_complex_function(ax1, ax2, func, c_value=0.5 + 0.5j, real_range=(-2, 2)
     ax1.set_xlabel("Re(z)")
     ax1.set_ylabel("Im(z)")
     ax1.set_zlabel("|f(z)|")
-    colorbar1 = ax1.figure.colorbar(surf1, ax=ax1, shrink=0.5, aspect=5)
+    colorbar1 = ax1.figure.colorbar(surf1, ax=ax1, shrink=0.5, aspect=10)
 
     # Plot phase
     ax2.clear()  # Clear previous plot
@@ -65,7 +65,7 @@ def plot_complex_function(ax1, ax2, func, c_value=0.5 + 0.5j, real_range=(-2, 2)
     ax2.set_xlabel("Re(z)")
     ax2.set_ylabel("Im(z)")
     ax2.set_zlabel("Arg(f(z))")
-    colorbar2 = ax2.figure.colorbar(surf2, ax=ax2, shrink=0.5, aspect=5)
+    colorbar2 = ax2.figure.colorbar(surf2, ax=ax2, shrink=0.5, aspect=10)
 
     # Return the new color bars
     return [colorbar1, colorbar2]
