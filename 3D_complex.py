@@ -1,8 +1,8 @@
-import tkinter as tk
-from tkinter import ttk
+import sys
 import numpy as np
 import matplotlib.pyplot as plt
-from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from PyQt5.QtWidgets import QApplication, QWidget, QComboBox, QVBoxLayout, QHBoxLayout, QPushButton, QLineEdit, QLabel
 
 # Predefined functions
 def function_1(z):
@@ -15,7 +15,7 @@ def function_3(z, c=0.5 + 0.5j):
     return (z + c) * (z - c) * np.exp(-np.abs(z)**2)
 
 # Plotting function
-def plot_complex_function(func, c_value=0.5 + 0.5j, real_range=(-2, 2), imag_range=(-2, 2), resolution=100):
+def plot_complex_function(ax1, ax2, func, c_value=0.5 + 0.5j, real_range=(-2, 2), imag_range=(-2, 2), resolution=100, colorbars=None):
     real_vals = np.linspace(real_range[0], real_range[1], resolution)
     imag_vals = np.linspace(imag_range[0], imag_range[1], resolution)
     X, Y = np.meshgrid(real_vals, imag_vals)
@@ -36,86 +36,115 @@ def plot_complex_function(func, c_value=0.5 + 0.5j, real_range=(-2, 2), imag_ran
             print(f"Error in custom function: {e}")
             return
 
-    fig = plt.figure(figsize=(12, 6))
-    
+    # Remove previous color bars if they exist
+    if colorbars:
+        for cb in colorbars:
+            cb.remove()
+
     # Plot magnitude
-    ax1 = fig.add_subplot(121, projection='3d')
+    ax1.clear()  # Clear previous plot
     surf1 = ax1.plot_surface(X, Y, np.abs(W), cmap='viridis')
     ax1.set_title("Magnitude")
     ax1.set_xlabel("Re(z)")
     ax1.set_ylabel("Im(z)")
     ax1.set_zlabel("|f(z)|")
-    fig.colorbar(surf1, ax=ax1, shrink=0.5, aspect=10)
+    colorbar1 = ax1.figure.colorbar(surf1, ax=ax1, shrink=0.5, aspect=5)
 
     # Plot phase
-    ax2 = fig.add_subplot(122, projection='3d')
+    ax2.clear()  # Clear previous plot
     surf2 = ax2.plot_surface(X, Y, np.angle(W), cmap='twilight')
     ax2.set_title("Phase")
     ax2.set_xlabel("Re(z)")
     ax2.set_ylabel("Im(z)")
     ax2.set_zlabel("Arg(f(z))")
-    fig.colorbar(surf2, ax=ax2, shrink=0.5, aspect=10)
+    colorbar2 = ax2.figure.colorbar(surf2, ax=ax2, shrink=0.5, aspect=5)
 
-    plt.show()
+    # Return the new color bars
+    return [colorbar1, colorbar2]
 
-# Tkinter GUI setup
-def on_combobox_change(event):
-    selected_func = combobox.get()
-    
-    # Show or hide the custom function input field based on combobox selection
-    if selected_func == "Custom Function":
-        func_input_label.grid(row=2, column=0, padx=10, pady=10, sticky="w")
-        func_input.grid(row=2, column=1, padx=10, pady=10)
-    else:
-        func_input_label.grid_forget()
-        func_input.grid_forget()
+class MainWindow(QWidget):
+    def __init__(self):
+        super().__init__()
 
-def on_plot_button_click():
-    selected_func = combobox.get()
-    custom_func = func_input.get()  # Get custom function input from text box
-    c_value = complex(c_input.get())  # Get value of c from input field and convert to complex
+        # Set window properties
+        self.setWindowTitle("Complex Function Plotter")
+        self.setGeometry(100, 100, 800, 600)
 
-    if selected_func == "Custom Function":
-        if custom_func:
-            # Inject c_value into the custom function expression, replace lowercase z
-            custom_func_with_c = custom_func.replace("c", str(c_value))
-            plot_complex_function(custom_func_with_c, c_value)
+        # Layout setup
+        self.layout = QVBoxLayout(self)
+
+        # Label for function selection
+        self.choose_function_label = QLabel("Choose Function:", self)
+        self.layout.addWidget(self.choose_function_label)
+
+        # Combobox for function selection
+        self.combobox = QComboBox(self)
+        self.combobox.addItem("sin(z)")
+        self.combobox.addItem("z^3 - 1")
+        self.combobox.addItem("(z + c) * (z - c) * np.exp(-np.abs(z)**2)")
+        self.combobox.addItem("Custom Function")
+        self.layout.addWidget(self.combobox)
+
+        # Input for custom function
+        self.func_input_label = QLabel("Enter Custom Function (e.g., z**2 + 1, z + c):", self)
+        self.layout.addWidget(self.func_input_label)
+        self.func_input = QLineEdit(self)
+        self.layout.addWidget(self.func_input)
+
+        # Input for 'c' value
+        self.c_input_label = QLabel("Enter Complex Value for c (e.g., 0.5+0.5j):", self)
+        self.layout.addWidget(self.c_input_label)
+        self.c_input = QLineEdit(self)
+        self.c_input.setText("0.5+0.5j")  # Default value
+        self.layout.addWidget(self.c_input)
+
+        # Plot button
+        self.plot_button = QPushButton("Plot", self)
+        self.plot_button.clicked.connect(self.on_plot_button_click)
+        self.layout.addWidget(self.plot_button)
+
+        # Matplotlib FigureCanvas
+        self.figure = plt.Figure(figsize=(12, 6))
+        self.canvas = FigureCanvas(self.figure)
+        self.layout.addWidget(self.canvas)
+
+        # Create subplots
+        self.ax1 = self.figure.add_subplot(121, projection='3d')
+        self.ax2 = self.figure.add_subplot(122, projection='3d')
+
+        # To keep track of colorbars
+        self.colorbars = []
+
+        self.combobox.currentIndexChanged.connect(self.on_combobox_change)
+
+    def on_combobox_change(self):
+        selected_func = self.combobox.currentText()
+
+        # Show or hide the custom function input based on combobox selection
+        if selected_func == "Custom Function":
+            self.func_input_label.show()
+            self.func_input.show()
         else:
-            print("Please enter a valid custom function.")
-    else:
-        plot_complex_function(selected_func, c_value)
+            self.func_input_label.hide()
+            self.func_input.hide()
 
-# Create main window
-root = tk.Tk()
-root.title("Complex Function Plotter")
+    def on_plot_button_click(self):
+        selected_func = self.combobox.currentText()
+        custom_func = self.func_input.text()  # Get custom function input from text box
+        c_value = complex(self.c_input.text())  # Get value of c from input field and convert to complex
 
-# Combobox for selecting the function
-combobox_label = tk.Label(root, text="Select Function:")
-combobox_label.grid(row=0, column=0, padx=10, pady=10, sticky="w")
+        # Plot the selected function
+        if selected_func == "Custom Function":
+            if custom_func:
+                custom_func_with_c = custom_func.replace("c", str(c_value))
+                self.colorbars = plot_complex_function(self.ax1, self.ax2, custom_func_with_c, c_value, colorbars=self.colorbars)
+        else:
+            self.colorbars = plot_complex_function(self.ax1, self.ax2, selected_func, c_value, colorbars=self.colorbars)
 
-# Human-readable options in the combobox
-combobox = ttk.Combobox(root, values=["sin(z)", "z^3 - 1", "(z + c) * (z - c) * np.exp(-np.abs(z)**2)", "Custom Function"])
-combobox.set("(z + c) * (z - c) * np.exp(-np.abs(z)**2)")  # Default selection
-combobox.grid(row=0, column=1, padx=10, pady=10)
-
-# Bind combobox change event
-combobox.bind("<<ComboboxSelected>>", on_combobox_change)
-
-# Input field for custom function (hidden initially)
-func_input_label = tk.Label(root, text="Enter Custom Function (e.g., z**2 + 1, z + c):")
-func_input = tk.Entry(root)
-
-# Input field for 'c' value
-c_input_label = tk.Label(root, text="Enter Complex Value for c (e.g., 0.5+0.5j):")
-c_input_label.grid(row=3, column=0, padx=10, pady=10, sticky="w")
-
-c_input = tk.Entry(root)
-c_input.insert(0, "0.5+0.5j")  # Default value
-c_input.grid(row=3, column=1, padx=10, pady=10)
-
-# Button to plot the function
-plot_button = tk.Button(root, text="Plot", command=on_plot_button_click)
-plot_button.grid(row=4, column=0, columnspan=2, padx=10, pady=20)
+        self.canvas.draw()
 
 # Run the application
-root.mainloop()
+app = QApplication(sys.argv)
+window = MainWindow()
+window.show()
+sys.exit(app.exec_())
